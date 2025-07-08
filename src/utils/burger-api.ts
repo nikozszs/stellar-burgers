@@ -3,8 +3,12 @@ import { TIngredient, TOrder, TOrdersData, TUser } from './types';
 
 const URL = process.env.BURGER_API_URL;
 
-const checkResponse = <T>(res: Response): Promise<T> =>
-  res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
+const checkResponse = <T>(res: Response): Promise<T> => {
+  if (!res.ok) {
+    throw new Error(`Ошибка HTTP: ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+};
 
 type TServerResponse<T> = {
   success: boolean;
@@ -77,6 +81,10 @@ export const getIngredientsApi = () =>
     .then((data) => {
       if (data?.success) return data.data;
       return Promise.reject(data);
+    })
+    .catch((err) => {
+      console.error(err);
+      return Promise.reject(err);
     });
 
 export const getFeedsApi = () =>

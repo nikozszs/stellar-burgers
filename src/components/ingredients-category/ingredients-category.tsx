@@ -6,8 +6,9 @@ import { IngredientsCategoryUI } from '../ui/ingredients-category';
 export const IngredientsCategory = forwardRef<
   HTMLUListElement,
   TIngredientsCategoryProps
->(({ title, titleRef, ingredients }, ref) => {
+>(({ title, titleRef, ingredients, onClick }, ref) => {
   /** TODO: взять переменную из стора */
+
   const burgerConstructor = {
     bun: {
       _id: ''

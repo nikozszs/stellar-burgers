@@ -85,6 +85,7 @@ module.exports = {
     path: path.resolve(__dirname, './dist'),
     filename: 'bundle.js'
   },
+  devtool: 'cheap-module-source-map',
   devServer: {
     static: path.join(__dirname, './dist'),
     compress: true,
