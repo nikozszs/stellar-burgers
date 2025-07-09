@@ -72,7 +72,7 @@ export const getUser = createAsyncThunk(
           return newResponse.user;
         } catch (refreshError) {
           dispatch(logout());
-          return rejectWithValue;
+          return rejectWithValue('Сессия истекла. Войдите снова');
         }
       }
       return rejectWithValue(
