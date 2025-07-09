@@ -15,14 +15,15 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AppHeader, IngredientDetails, Modal, OrderInfo } from '@components';
 import { ProtectedRoute } from '../ProtectedRoute';
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import {
   fetchIngredients,
   selectIngredients,
   selectIngredientsError,
   selectIngredientsLoading
 } from '../../services/slices/ingredientSlice';
-import { useAppDispatch } from '../../services/store';
+import { useAppDispatch, useSelector } from '../../services/store';
+import { getUser, init, logout } from '../../services/slices/userSlice';
+import { getCookie } from '../../utils/cookie';
 
 const App = () => {
   const location = useLocation();
@@ -35,6 +36,20 @@ const App = () => {
 
   useEffect(() => {
     dispatch(fetchIngredients());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const token = getCookie('accessToken');
+    if (token) {
+      dispatch(getUser())
+        .unwrap()
+        .catch((err) => {
+          console.error('Failed to get user:', err);
+          dispatch(logout());
+        });
+    } else {
+      dispatch(init());
+    }
   }, [dispatch]);
 
   const handleModalClose = () => navidate(-1);

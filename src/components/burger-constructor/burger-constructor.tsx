@@ -3,7 +3,12 @@ import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
 import { useDispatch, useSelector } from '../../services/store';
 import { clearConstructor } from '../../services/slices/constructorItemsSlice';
-import { clearCurrentOrder, createOrder, selectCurrentOrder, selectOrderRequest } from '../../services/slices/orderSlice';
+import {
+  clearCurrentOrder,
+  createOrder,
+  selectCurrentOrder,
+  selectOrderRequest
+} from '../../services/slices/orderSlice';
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();

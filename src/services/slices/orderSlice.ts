@@ -3,42 +3,47 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TOrdersData, TOrderState } from '@utils-types';
 
 export const initialState: TOrderState = {
-    orders: [],
-    total: 0,
-    totalToday: 0,
-    currentOrder: null,
-    orderRequest: false,
-    error: null
+  orders: [],
+  total: 0,
+  totalToday: 0,
+  currentOrder: null,
+  orderRequest: false,
+  error: null
 };
 
 // Создание заказа из конструктора
 export const createOrder = createAsyncThunk(
   'order/create',
-  async (ingredients: string[], {rejectWithValue}) => {
+  async (ingredients: string[], { rejectWithValue }) => {
     try {
-        const response = await orderBurgerApi(ingredients);
-        return response.order;
+      const response = await orderBurgerApi(ingredients);
+      return response.order;
     } catch (error) {
-        return rejectWithValue
-        (error instanceof Error ? error.message : 'Не удалось создать созданный Вами заказ')
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось создать созданный Вами заказ'
+      );
     }
   }
 );
 
 // Получение списка заказов
 export const fetchOrders = createAsyncThunk(
-    'orders/fetchAll',
-    async (_, {rejectWithValue}) => {
-        try {
-            const orders = await getOrdersApi();
-            return orders;
-        } catch (error) {
-            return  rejectWithValue(
-                error instanceof Error ? error.message : 'Ошибка при загрузке ленты заказов'
-            );
-        }
+  'orders/fetchAll',
+  async (_, { rejectWithValue }) => {
+    try {
+      const orders = await getOrdersApi();
+      return orders;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при загрузке ленты заказов'
+      );
     }
-)
+  }
+);
 
 export const orderSlice = createSlice({
   name: 'order',
@@ -51,22 +56,22 @@ export const orderSlice = createSlice({
     selectOrderRequest: (state) => state.orderRequest,
     selectError: (state) => state.error,
     selectOrderData: (state) => ({
-        orders: state.orders,
-        total: state.total,
-        totalToday: state.totalToday,
-        currentOrder: state.currentOrder,
-        orderRequest: state.orderRequest,
-        error: state.error,
+      orders: state.orders,
+      total: state.total,
+      totalToday: state.totalToday,
+      currentOrder: state.currentOrder,
+      orderRequest: state.orderRequest,
+      error: state.error
     })
   },
   reducers: {
     setOrderModalData: (state, action: PayloadAction<TOrdersData>) => {
-        state.orders = action.payload.orders;
-        state.total = action.payload.total;
-        state.totalToday = action.payload.totalToday;
+      state.orders = action.payload.orders;
+      state.total = action.payload.total;
+      state.totalToday = action.payload.totalToday;
     },
     clearCurrentOrder: (state) => {
-        state.currentOrder = null;
+      state.currentOrder = null;
     }
   },
   extraReducers: (builder) => {
@@ -89,21 +94,19 @@ export const orderSlice = createSlice({
         state.orders = action.payload.orders;
         state.total = action.payload.total;
         state.totalToday = action.payload.totalToday;
-      })
+      });
   }
 });
 
-export const {
-    setOrderModalData,
-    clearCurrentOrder
-} = orderSlice.actions;
+export const { setOrderModalData, clearCurrentOrder } = orderSlice.actions;
 
-export const orderReducer  = orderSlice.reducer;
-export const { selectOrders, 
-    selectTotal,
-    selectTotalToday,
-    selectCurrentOrder,
-    selectOrderRequest,
-    selectError,
-    selectOrderData
+export const orderReducer = orderSlice.reducer;
+export const {
+  selectOrders,
+  selectTotal,
+  selectTotalToday,
+  selectCurrentOrder,
+  selectOrderRequest,
+  selectError,
+  selectOrderData
 } = orderSlice.selectors;

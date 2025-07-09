@@ -20,7 +20,7 @@ export type TOrderState = TOrdersData & {
   currentOrder: TOrder | null;
   orderRequest: boolean;
   error: string | null;
-}
+};
 
 export type TOrder = {
   _id: string;
@@ -41,6 +41,11 @@ export type TOrdersData = {
 export type TUser = {
   email: string;
   name: string;
+};
+
+export type TLoginData = {
+  email: string;
+  password: string;
 };
 
 export type TTabMode = 'bun' | 'sauce' | 'main';

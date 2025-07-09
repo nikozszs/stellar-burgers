@@ -1,78 +1,147 @@
-// import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-// import { getToken, getUser } from '../../api/user';
-// import { User } from '../../types';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import {
+  getUserApi,
+  loginUserApi,
+  refreshToken,
+  registerUserApi,
+  TRegisterData
+} from '../../utils/burger-api';
+import { TLoginData, TUser } from '@utils-types';
+import { setCookie } from '../../utils/cookie';
 
-// export const loginUserThunk = createAsyncThunk(
-//     'users/loginUser',
-//     ({login, password}: {login: string; password: string}) =>
-//         getToken({login, password})
-//             .then(token => {
-//                 localStorage.setItem('token', token);
-//                 return token;
-//             }),
-// )
+export interface UserState {
+  isInit: boolean;
+  isLoading: boolean;
+  user: TUser | null;
+  error: string | null;
+}
 
-// export const getUserThunk = createAsyncThunk(
-//     'users/getUser',
-//     ({token}: {token: string}) =>
-//         getUser({token}),
-// )
+const initialState: UserState = {
+  isInit: false,
+  isLoading: false,
+  user: null,
+  error: null
+};
+// регистрация
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (userData: TRegisterData, { rejectWithValue }) => {
+    try {
+      const response = await registerUserApi(userData);
+      setCookie('accessToken', response.accessToken.split('Bearer ')[1], {
+        expires: 20 * 60
+      });
+      localStorage.setItem('refreshToken', response.refreshToken);
+      return response.user;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Registration failed'
+      );
+    }
+  }
+);
 
-// export interface UserState {
-//     isInit: boolean;
-//     isLoading: boolean;
-//     user: User | null;
-//     error: string | null;
-// }
+//вход
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (loginData: TLoginData) => {
+    const response = await loginUserApi(loginData);
+    return response.user;
+  }
+);
 
-// const initialState: UserState = {
-//     isInit: false,
-//     isLoading: false,
-//     user: null,
-//     error: null,
-// }
+//гет данных
+export const getUser = createAsyncThunk(
+  'auth/user',
+  async (_, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await getUserApi();
+      return response.user;
+    } catch (error) {
+      if ((error as Error).message.includes('jwt expired')) {
+        try {
+          const refreshData = await refreshToken();
+          setCookie(
+            'accessToken',
+            refreshData.accessToken.split('Bearer ')[1],
+            { expires: 20 * 60 }
+          );
+          localStorage.setItem('refreshToken', refreshData.refreshToken);
 
-// export const userSlice = createSlice({
-//     name: 'user',
-//     initialState,
-//     reducers: {
-//         init: (state) => {
-//             state.isInit = true;
-//         },
-//         logout: (state) => {
-//             // Очищаем состояние пользователя
-//             state.user = null;
-//             // Удаляем токен из localStorage
-//             localStorage.removeItem('token');
-//         }
-//     },
-//     extraReducers: (builder) => {
+          const newResponse = await getUserApi();
+          return newResponse.user;
+        } catch (refreshError) {
+          dispatch(logout());
+          return rejectWithValue('Сессия истекла. Войдите снова');
+        }
+      }
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Ошибка получения данных'
+      );
+    }
+  }
+);
 
-//         builder.addCase(loginUserThunk.pending, (state) => {
-//             state.isLoading = true;
-//         });
-//         builder.addCase(loginUserThunk.rejected, (state) => {
-//             state.isLoading = false;
-//         });
-//         builder.addCase(loginUserThunk.fulfilled, (state) => {
-//             state.isLoading = false;
-//         });
+export const userSlice = createSlice({
+  name: 'user',
+  initialState,
+  reducers: {
+    init: (state) => {
+      state.isInit = true;
+    },
+    logout: (state) => {
+      state.user = null;
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
+  },
+  extraReducers: (builder) => {
+    //гет данных
+    builder.addCase(getUser.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(getUser.rejected, (state, action) => {
+      state.isLoading = false;
+      state.isInit = true;
+      state.error = action.payload as string;
+    });
+    builder.addCase(getUser.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.isInit = true;
+      state.user = action.payload;
+    });
 
-//         builder.addCase(getUserThunk.pending, (state) => {
-//             state.isLoading = true;
-//         });
-//         builder.addCase(getUserThunk.rejected, (state) => {
-//             state.isInit = true;
-//             state.isLoading = false;
-//         });
-//         builder.addCase(getUserThunk.fulfilled, (state, {payload}) => {
-//             state.isInit = true;
-//             state.isLoading = false;
-//             state.user = payload;
-//         });
-//     }
-// });
+    // вход
+    builder.addCase(loginUser.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(loginUser.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.user = action.payload;
+    });
+    builder.addCase(loginUser.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || 'Ошибка входа';
+    });
 
-// export const {init} = userSlice.actions;
+    // регистрация
+    builder.addCase(registerUser.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(registerUser.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.user = action.payload;
+      state.error = null;
+    });
+    builder.addCase(registerUser.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || 'Ошибка регистрациии';
+    });
+  }
+});
 
-// export default userSlice.reducer
+export const { init, logout } = userSlice.actions;
+export const userReducer = userSlice.reducer;

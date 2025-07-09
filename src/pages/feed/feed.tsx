@@ -14,7 +14,7 @@ export const Feed: FC = () => {
 
   const handleGetFeeds = () => {
     dispatch(fetchOrders());
-  }
+  };
 
   if (!orders.length) {
     return <Preloader />;
