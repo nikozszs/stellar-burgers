@@ -5,9 +5,12 @@ import {
   useSelector as selectorHook
 } from 'react-redux';
 import { ingredientsReducer } from './slices/ingredientSlice';
+import { constructorItemsReducer } from './slices/constructorItemsSlice';
 
 const rootReducer = combineReducers({
-  ingredients: ingredientsReducer
+  ingredients: ingredientsReducer,
+  constructorItems: constructorItemsReducer
+  // order: orderReducer
 });
 
 export const store = configureStore({
@@ -21,5 +24,6 @@ export type AppDispatch = typeof store.dispatch;
 
 export const useDispatch: () => AppDispatch = () => dispatchHook();
 export const useSelector: TypedUseSelectorHook<RootState> = selectorHook;
+export const useAppDispatch = () => useDispatch();
 
 export default store;

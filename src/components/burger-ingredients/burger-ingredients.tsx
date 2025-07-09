@@ -3,28 +3,17 @@ import { useInView } from 'react-intersection-observer';
 import { TIngredient, TTabMode } from '@utils-types';
 import { BurgerIngredientsUI } from '../ui/burger-ingredients';
 import { useSelector } from 'react-redux';
-import { useDispatch } from '../../services/store';
-import {
-  fetchIngredients,
-  selectIngredients,
-  selectIngredientsError,
-  selectIngredientsLoading
-} from '../../services/slices/ingredientSlice';
+import { selectIngredients } from '../../services/slices/ingredientSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export const BurgerIngredients: FC = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const ingredients = useSelector(selectIngredients);
-  const isLoading = useSelector(selectIngredientsLoading);
-  const error = useSelector(selectIngredientsError);
 
   const handleIngredientClick = (ingredient: TIngredient) => {
-    if (!ingredient?._id) {
-      return;
-    }
-    navigate('/ingredients/${ingredient._id}', {
+    if (!ingredient?._id) return;
+    navigate(`/ingredients/${ingredient._id}`, {
       state: { background: location }
     });
   };
@@ -57,10 +46,6 @@ export const BurgerIngredients: FC = () => {
   });
 
   useEffect(() => {
-    dispatch(fetchIngredients());
-  }, [dispatch]);
-
-  useEffect(() => {
     if (inViewBuns) {
       setCurrentTab('bun');
     } else if (inViewSauces) {
@@ -79,10 +64,6 @@ export const BurgerIngredients: FC = () => {
     if (tab === 'sauce')
       titleSaucesRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
-  if (isLoading) return <div>Загрузка ингредиентов...</div>;
-  if (error) return <div>Ошибка: {error}</div>;
-  if (ingredients.length === 0) return <div>Нет доступных ингредиентов</div>;
 
   return (
     <BurgerIngredientsUI
