@@ -3,34 +3,32 @@ import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
 import { useDispatch, useSelector } from '../../services/store';
 import { clearConstructor } from '../../services/slices/constructorItemsSlice';
+import { clearCurrentOrder, createOrder, selectCurrentOrder, selectOrderRequest } from '../../services/slices/orderSlice';
 
 export const BurgerConstructor: FC = () => {
-  /** TODO: взять переменные constructorItems, orderRequest и orderModalData из стора */
   const dispatch = useDispatch();
   const { bun, ingredients } = useSelector((state) => state.constructorItems);
-  // const { orderRequest, orderModalData } = useSelector((state) => state.order)
+  const orderRequest = useSelector(selectOrderRequest);
+  const orderModalData = useSelector(selectCurrentOrder);
   const constructorItems = {
     bun,
     ingredients
   };
 
-  const orderRequest = false;
-
-  const orderModalData = null;
-
   const onOrderClick = () => {
-    if (!constructorItems.bun || orderRequest) return;
+    if (!bun || orderRequest) return;
 
     const orderIngredients = [
-      constructorItems.bun._id,
-      ...constructorItems.ingredients.map((item) => item._id),
-      constructorItems.bun._id
+      bun._id,
+      ...ingredients.map((item) => item._id),
+      bun._id
     ];
-    // dispatch(createOrder(orderIngredients))
+    dispatch(createOrder(orderIngredients));
   };
 
   const closeOrderModal = () => {
     dispatch(clearConstructor());
+    dispatch(clearCurrentOrder());
   };
 
   const price = useMemo(
