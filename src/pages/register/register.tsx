@@ -14,7 +14,14 @@ export const Register: FC = () => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    dispatch(registerUser({ email, name: userName, password }));
+    dispatch(registerUser({ email, name: userName, password }))
+      .unwrap()
+      .then(() => {
+        navigate('/profile', { replace: true})
+      })
+      .catch((err) => {
+        console.error(err)
+      })
   };
 
   useEffect(() => {

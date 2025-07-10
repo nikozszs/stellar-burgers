@@ -13,7 +13,12 @@ export const Login: FC = () => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    dispatch(loginUser({ email, password }));
+    dispatch(loginUser({ email, password }))
+      .unwrap()
+      .then(() => {
+        navigate('/profile', { replace: true });
+      })
+      .catch((err) => console.log(err))
   };
 
   useEffect(() => {
