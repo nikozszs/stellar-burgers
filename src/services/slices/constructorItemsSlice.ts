@@ -50,6 +50,9 @@ export const constructorItemsSlice = createSlice({
       state.bun = null;
       state.ingredients = [];
     }
+  },
+  selectors: {
+    selectConstructorItems: (state) => state
   }
 });
 
@@ -61,3 +64,4 @@ export const {
 } = constructorItemsSlice.actions;
 
 export const constructorItemsReducer = constructorItemsSlice.reducer;
+export const {selectConstructorItems} = constructorItemsSlice.selectors;

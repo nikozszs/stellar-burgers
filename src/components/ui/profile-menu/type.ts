@@ -1,4 +1,6 @@
+import { SyntheticEvent } from "react";
+
 export type ProfileMenuUIProps = {
   pathname: string;
-  handleLogout: () => void;
+  handleLogout: (e: SyntheticEvent) => void;
 };

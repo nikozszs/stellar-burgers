@@ -10,7 +10,7 @@ export const Feed: FC = () => {
 
   useEffect(() => {
     dispatch(fetchOrders());
-  }, [dispatch]);
+  }, [dispatch, orders.length]);
 
   const handleGetFeeds = () => {
     dispatch(fetchOrders());

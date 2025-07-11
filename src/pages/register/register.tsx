@@ -1,7 +1,7 @@
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { RegisterUI } from '@ui-pages';
 import { useDispatch, useSelector } from '../../services/store';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { registerUser } from '../../services/slices/userSlice';
 
 export const Register: FC = () => {
@@ -11,13 +11,14 @@ export const Register: FC = () => {
   const dispatch = useDispatch();
   const { user, isLoading } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     dispatch(registerUser({ email, name: userName, password }))
       .unwrap()
       .then(() => {
-        navigate('/profile', { replace: true})
+        navigate(location.state?.from || '/profile', { replace: true });
       })
       .catch((err) => {
         console.error(err)
@@ -26,9 +27,9 @@ export const Register: FC = () => {
 
   useEffect(() => {
     if (user && !isLoading) {
-      navigate('/profile', { replace: true });
+      navigate(location.state?.from || '/profile', { replace: true });
     }
-  }, [user, isLoading, navigate]);
+  }, [user, isLoading, navigate, location.state]);
 
   return (
     <RegisterUI

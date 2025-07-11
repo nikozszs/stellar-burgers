@@ -28,7 +28,7 @@ import { getCookie } from '../../utils/cookie';
 const App = () => {
   const location = useLocation();
   const background = location.state?.background;
-  const navidate = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const ingredients = useSelector(selectIngredients);
   const isLoading = useSelector(selectIngredientsLoading);
@@ -52,7 +52,7 @@ const App = () => {
     }
   }, [dispatch]);
 
-  const handleModalClose = () => navidate(-1);
+  const handleModalClose = () => navigate(-1);
 
   if (isLoading) return <div>Загрузка ингредиентов...</div>;
   if (error) return <div>Ошибка: {error}</div>;
@@ -84,7 +84,7 @@ const App = () => {
           path='/profile'
           element={<ProtectedRoute element={<Profile />} />}
         >
-          <Route path='orders' element={<ProfileOrders />} />
+          <Route path='orders'  element={<ProfileOrders />} />
         </Route>
 
         <Route path='*' element={<NotFound404 />} />
@@ -111,7 +111,7 @@ const App = () => {
             path='/profile/orders/:number'
             element={
               <Modal title='Детали заказа' onClose={handleModalClose}>
-                <ProtectedRoute onlyUnAuth element={<OrderInfo />} />
+                {<OrderInfo />}
               </Modal>
             }
           />

@@ -1,4 +1,4 @@
-import { getOrdersApi, orderBurgerApi } from '@api';
+import { getOrderByNumberApi, getOrdersApi, orderBurgerApi } from '@api';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TOrdersData, TOrderState } from '@utils-types';
 
@@ -45,6 +45,23 @@ export const fetchOrders = createAsyncThunk(
   }
 );
 
+// получение заказа по номеру
+export const fetchOrderByNumber  = createAsyncThunk(
+  'orders/fetchByNumber',
+  async (number: number, { rejectWithValue }) => {
+    try {
+      const response = await getOrderByNumberApi(number);
+      return response.orders[0];
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : 'Ошибка при загрузке заказа'
+      );
+    }
+  }
+);
+
 export const orderSlice = createSlice({
   name: 'order',
   initialState,
@@ -72,7 +89,8 @@ export const orderSlice = createSlice({
     },
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
-    }
+    },
+    resetOrderState: () => initialState
   },
   extraReducers: (builder) => {
     builder
@@ -90,15 +108,27 @@ export const orderSlice = createSlice({
         state.orderRequest = false;
         state.error = action.payload as string;
       })
+      .addCase(fetchOrders.pending, (state) => {
+        state.error = null;
+      })
       .addCase(fetchOrders.fulfilled, (state, action) => {
         state.orders = action.payload.orders;
         state.total = action.payload.total;
         state.totalToday = action.payload.totalToday;
-      });
+      })
+      .addCase(fetchOrders.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(fetchOrderByNumber.pending, (state) => {
+        state.currentOrder = null;
+      })
+      .addCase(fetchOrderByNumber.fulfilled, (state, action) => {
+        state.currentOrder = action.payload;
+      })
   }
 });
 
-export const { setOrderModalData, clearCurrentOrder } = orderSlice.actions;
+export const { setOrderModalData, clearCurrentOrder, resetOrderState } = orderSlice.actions;
 
 export const orderReducer = orderSlice.reducer;
 export const {

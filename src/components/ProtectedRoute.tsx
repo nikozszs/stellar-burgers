@@ -1,5 +1,7 @@
 import { FC, JSX } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useSelector } from '../services/store';
+import { Preloader } from '@ui';
 
 type ProtectedRouteProps = {
   onlyUnAuth?: boolean;
@@ -11,16 +13,19 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
   element
 }) => {
   const location = useLocation();
-  const isAuthenticated = false;
+  const { user, isInit } = useSelector(state => state.user)
 
-  // Если роут только для неавторизованных, а пользователь авторизован
-  if (onlyUnAuth && isAuthenticated) {
+  // Если проверка аутентификации еще не завершена
+  if (!isInit) return <Preloader />
+
+  // Если маршрут только для неавторизованных, а пользователь авторизован
+  if (onlyUnAuth && user) {
     const from = location.state?.from || '/';
     return <Navigate to={from} replace />;
   }
 
   // Если роут защищённый, а пользователь не авторизован
-  if (!onlyUnAuth && !isAuthenticated) {
+  if (!onlyUnAuth && !user) {
     return <Navigate to='/login' state={{ from: location }} replace />;
   }
 

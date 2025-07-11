@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
   getUserApi,
   loginUserApi,
+  logoutApi,
   refreshToken,
   registerUserApi,
   TRegisterData,
@@ -9,6 +10,7 @@ import {
 } from '../../utils/burger-api';
 import { TLoginData, TUser } from '@utils-types';
 import { setCookie } from '../../utils/cookie';
+import { RootState } from '../store';
 
 export interface UserState {
   isInit: boolean;
@@ -98,6 +100,22 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+//выход 
+export const logoutUser = createAsyncThunk(
+  'auth/logout',
+  async (_, { rejectWithValue, dispatch }) => {
+    try {
+      await logoutApi();
+      dispatch(logout())
+      return null;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Ошибка выхода'
+      );
+    }
+  }
+);
+
 export const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -107,6 +125,8 @@ export const userSlice = createSlice({
     },
     logout: (state) => {
       state.user = null;
+      state.isLoading = false;
+      state.error = null;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
     }
@@ -136,10 +156,26 @@ export const userSlice = createSlice({
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.isLoading = false;
       state.user = action.payload;
+      state.error = null;
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || 'Ошибка входа';
+    });
+
+    // выход
+    builder.addCase(logoutUser.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(logoutUser.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.user = null;
+      state.error = null;
+    });
+    builder.addCase(logoutUser.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
     });
 
     // регистрация
@@ -151,6 +187,7 @@ export const userSlice = createSlice({
       state.isLoading = false;
       state.user = action.payload;
       state.error = null;
+      state.isInit = true;
     });
     builder.addCase(registerUser.rejected, (state, action) => {
       state.isLoading = false;
@@ -169,9 +206,12 @@ export const userSlice = createSlice({
     builder.addCase(updateUser.fulfilled, (state, action) => {
       state.isLoading = false;
       state.user = action.payload;
+      state.isInit = true;
     });
   }
 });
 
 export const { init, logout } = userSlice.actions;
 export const userReducer = userSlice.reducer;
+export const selectInit = (state: RootState) => state.user.isInit;
+export const selectUser = (state: RootState) => state.user.user;
