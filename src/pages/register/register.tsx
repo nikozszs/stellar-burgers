@@ -13,16 +13,19 @@ export const Register: FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleSubmit = (e: SyntheticEvent) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
-    dispatch(registerUser({ email, name: userName, password }))
-      .unwrap()
-      .then(() => {
+    try {
+      const result = await dispatch(
+        registerUser({ email, name: userName, password })
+      ).unwrap();
+
+      if (result.name) {
         navigate(location.state?.from || '/profile', { replace: true });
-      })
-      .catch((err) => {
-        console.error(err)
-      })
+      }
+    } catch (err) {
+      console.error('Registration error:', err);
+    }
   };
 
   useEffect(() => {

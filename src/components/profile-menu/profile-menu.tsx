@@ -7,15 +7,17 @@ import { logoutUser } from '../../services/slices/userSlice';
 export const ProfileMenu: FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const handleLogout = async(e: SyntheticEvent) => {
+  const handleLogout = async (e: SyntheticEvent) => {
     e.preventDefault();
     try {
-      await dispatch(logoutUser()).unwrap();
-      navigate('/login');
+      const result = await dispatch(logoutUser()).unwrap();
+      if (result === null) {
+        navigate('/login');
+      }
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   };
 

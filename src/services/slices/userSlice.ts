@@ -88,7 +88,10 @@ export const getUser = createAsyncThunk(
 //апдейт юзера
 export const updateUser = createAsyncThunk(
   'auth/update',
-  async (userData: { name: string; email: string; password?: string }, { rejectWithValue }) => {
+  async (
+    userData: { name: string; email: string; password?: string },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await updateUserApi(userData);
       return response.user;
@@ -100,15 +103,22 @@ export const updateUser = createAsyncThunk(
   }
 );
 
-//выход 
+//выход
+export const clearAuthTokens = () => {
+  localStorage.removeItem('refreshToken');
+  document.cookie = 'accessToken=; Max-Age=0; path=/;';
+};
+
 export const logoutUser = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue, dispatch }) => {
     try {
       await logoutApi();
-      dispatch(logout())
+      clearAuthTokens();
+      dispatch(logout());
       return null;
     } catch (error) {
+      clearAuthTokens();
       return rejectWithValue(
         error instanceof Error ? error.message : 'Ошибка выхода'
       );
@@ -127,8 +137,6 @@ export const userSlice = createSlice({
       state.user = null;
       state.isLoading = false;
       state.error = null;
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
     }
   },
   extraReducers: (builder) => {

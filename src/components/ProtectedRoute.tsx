@@ -13,10 +13,10 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
   element
 }) => {
   const location = useLocation();
-  const { user, isInit } = useSelector(state => state.user)
+  const { user, isInit } = useSelector((state) => state.user);
 
   // Если проверка аутентификации еще не завершена
-  if (!isInit) return <Preloader />
+  if (!isInit) return <Preloader />;
 
   // Если маршрут только для неавторизованных, а пользователь авторизован
   if (onlyUnAuth && user) {

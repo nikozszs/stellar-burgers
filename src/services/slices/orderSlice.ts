@@ -1,14 +1,27 @@
-import { getOrderByNumberApi, getOrdersApi, orderBurgerApi } from '@api';
+import {
+  getFeedsApi,
+  getOrderByNumberApi,
+  getOrdersApi,
+  orderBurgerApi
+} from '@api';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TOrdersData, TOrderState } from '@utils-types';
 
 export const initialState: TOrderState = {
-  orders: [],
-  total: 0,
-  totalToday: 0,
+  userOrders: {
+    orders: [],
+    total: 0,
+    totalToday: 0
+  },
+  feedOrders: {
+    orders: [],
+    total: 0,
+    totalToday: 0
+  },
   currentOrder: null,
   orderRequest: false,
-  error: null
+  error: null,
+  feedError: null
 };
 
 // Создание заказа из конструктора
@@ -30,7 +43,7 @@ export const createOrder = createAsyncThunk(
 
 // Получение списка заказов
 export const fetchOrders = createAsyncThunk(
-  'orders/fetchAll',
+  'orders/fetchUser',
   async (_, { rejectWithValue }) => {
     try {
       const orders = await getOrdersApi();
@@ -46,7 +59,7 @@ export const fetchOrders = createAsyncThunk(
 );
 
 // получение заказа по номеру
-export const fetchOrderByNumber  = createAsyncThunk(
+export const fetchOrderByNumber = createAsyncThunk(
   'orders/fetchByNumber',
   async (number: number, { rejectWithValue }) => {
     try {
@@ -54,9 +67,22 @@ export const fetchOrderByNumber  = createAsyncThunk(
       return response.orders[0];
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : 'Ошибка при загрузке заказа'
+        error instanceof Error ? error.message : 'Ошибка при загрузке заказа'
+      );
+    }
+  }
+);
+
+//публичная лента
+export const fetchAllOrders = createAsyncThunk(
+  'orders/fetchAll',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getFeedsApi();
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Ошибка загрузки ленты заказов'
       );
     }
   }
@@ -66,26 +92,33 @@ export const orderSlice = createSlice({
   name: 'order',
   initialState,
   selectors: {
-    selectOrders: (state) => state.orders,
-    selectTotal: (state) => state.total,
-    selectTotalToday: (state) => state.totalToday,
+    selectUserOrders: (state) => state.userOrders,
+    selectTotal: (state) => state.feedOrders.total,
+    selectTotalToday: (state) => state.feedOrders.totalToday,
+    selectFeedOrders: (state) => state.feedOrders,
     selectCurrentOrder: (state) => state.currentOrder,
     selectOrderRequest: (state) => state.orderRequest,
-    selectError: (state) => state.error,
+    selectUserError: (state) => state.error,
+    selectFeedError: (state) => state.feedError,
     selectOrderData: (state) => ({
-      orders: state.orders,
-      total: state.total,
-      totalToday: state.totalToday,
+      userOrders: state.userOrders,
+      feedOrders: state.feedOrders,
       currentOrder: state.currentOrder,
       orderRequest: state.orderRequest,
-      error: state.error
+      error: state.error,
+      feedError: state.feedError
     })
   },
   reducers: {
-    setOrderModalData: (state, action: PayloadAction<TOrdersData>) => {
-      state.orders = action.payload.orders;
-      state.total = action.payload.total;
-      state.totalToday = action.payload.totalToday;
+    setOrderModalData: (
+      state,
+      action: PayloadAction<{ data: TOrdersData; type: 'user' | 'feed' }>
+    ) => {
+      if (action.payload.type === 'user') {
+        state.userOrders = action.payload.data;
+      } else {
+        state.feedOrders = action.payload.data;
+      }
     },
     clearCurrentOrder: (state) => {
       state.currentOrder = null;
@@ -100,21 +133,36 @@ export const orderSlice = createSlice({
       })
       .addCase(createOrder.fulfilled, (state, action) => {
         state.orderRequest = false;
-        state.total += 1;
-        state.totalToday += 1;
+        state.userOrders.total += 1;
+        state.userOrders.totalToday += 1;
         state.currentOrder = action.payload;
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.orderRequest = false;
         state.error = action.payload as string;
       })
+      // Обработка публичной ленты
+      .addCase(fetchAllOrders.pending, (state) => {
+        state.feedError = null;
+      })
+      .addCase(fetchAllOrders.fulfilled, (state, action) => {
+        state.feedOrders.orders = action.payload.orders;
+        state.feedOrders.total = action.payload.total;
+        state.feedOrders.totalToday = action.payload.totalToday;
+        state.feedError = null;
+      })
+      .addCase(fetchAllOrders.rejected, (state, action) => {
+        state.feedError = action.payload as string;
+      })
+
+      // Обработка личных заказов
       .addCase(fetchOrders.pending, (state) => {
         state.error = null;
       })
       .addCase(fetchOrders.fulfilled, (state, action) => {
-        state.orders = action.payload.orders;
-        state.total = action.payload.total;
-        state.totalToday = action.payload.totalToday;
+        state.userOrders.orders = action.payload.orders;
+        state.userOrders.total = action.payload.total;
+        state.userOrders.totalToday = action.payload.totalToday;
       })
       .addCase(fetchOrders.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -124,19 +172,22 @@ export const orderSlice = createSlice({
       })
       .addCase(fetchOrderByNumber.fulfilled, (state, action) => {
         state.currentOrder = action.payload;
-      })
+      });
   }
 });
 
-export const { setOrderModalData, clearCurrentOrder, resetOrderState } = orderSlice.actions;
+export const { setOrderModalData, clearCurrentOrder, resetOrderState } =
+  orderSlice.actions;
 
 export const orderReducer = orderSlice.reducer;
 export const {
-  selectOrders,
-  selectTotal,
-  selectTotalToday,
+  selectUserOrders,
+  selectFeedOrders,
   selectCurrentOrder,
   selectOrderRequest,
-  selectError,
-  selectOrderData
+  selectUserError,
+  selectFeedError,
+  selectOrderData,
+  selectTotal,
+  selectTotalToday
 } = orderSlice.selectors;

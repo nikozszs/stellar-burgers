@@ -16,10 +16,13 @@ export type TConstructorIngredient = TIngredient & {
   id: string;
 };
 
-export type TOrderState = TOrdersData & {
+export type TOrderState = {
+  userOrders: TOrdersData;
+  feedOrders: TOrdersData;
   currentOrder: TOrder | null;
   orderRequest: boolean;
   error: string | null;
+  feedError: string | null;
 };
 
 export type TOrder = {

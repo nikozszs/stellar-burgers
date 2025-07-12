@@ -18,7 +18,7 @@ export const Login: FC = () => {
       .then(() => {
         navigate('/profile', { replace: true });
       })
-      .catch((err) => console.log(err))
+      .catch((err) => console.log(err));
   };
 
   useEffect(() => {
