@@ -24,20 +24,17 @@ export const constructorItemsSlice = createSlice({
           state.ingredients.push(ingredient);
         }
       },
-      prepare: (ingredient: TIngredient) => {
-        return {
-          payload: {
-            ...ingredient,
-            id: nanoid()
-          }
-        };
-      }
+      prepare: (ingredient: TIngredient) => ({
+        payload: {
+          ...ingredient,
+          id: nanoid()
+        }
+      })
     },
-    removeIngredient: (state, action: PayloadAction<string>) => {
-      state.ingredients = state.ingredients.filter(
+    removeIngredient: (state, action: PayloadAction<string>) =>
+      void (state.ingredients = state.ingredients.filter(
         (item) => item.id !== action.payload
-      );
-    },
+      )),
     moveIngredient: (
       state,
       action: PayloadAction<{ fromIndex: number; toIndex: number }>

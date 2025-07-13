@@ -1,4 +1,4 @@
-import { ChangeEvent, SyntheticEvent } from 'react';
+import { ChangeEvent, ReactNode, SyntheticEvent } from 'react';
 
 export type ProfileUIProps = {
   formValue: {

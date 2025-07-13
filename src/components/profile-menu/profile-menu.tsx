@@ -8,16 +8,14 @@ export const ProfileMenu: FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const handleLogout = async (e: SyntheticEvent) => {
     e.preventDefault();
     try {
-      const result = await dispatch(logoutUser()).unwrap();
-      if (result === null) {
-        navigate('/login');
-      }
+      await dispatch(logoutUser()).unwrap();
+      navigate('/login', { replace: true });
     } catch (error) {
       console.error(error);
+      navigate('/login', { replace: true });
     }
   };
 

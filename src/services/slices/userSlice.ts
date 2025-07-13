@@ -31,14 +31,12 @@ export const registerUser = createAsyncThunk(
   async (userData: TRegisterData, { rejectWithValue }) => {
     try {
       const response = await registerUserApi(userData);
-      setCookie('accessToken', response.accessToken.split('Bearer ')[1], {
-        expires: 20 * 60
-      });
+      setCookie('accessToken', response.accessToken);
       localStorage.setItem('refreshToken', response.refreshToken);
       return response.user;
     } catch (error) {
       return rejectWithValue(
-        error instanceof Error ? error.message : 'Registration failed'
+        error instanceof Error ? error.message : 'Ошибка регистрации'
       );
     }
   }
@@ -47,13 +45,21 @@ export const registerUser = createAsyncThunk(
 //вход
 export const loginUser = createAsyncThunk(
   'auth/login',
-  async (loginData: TLoginData) => {
-    const response = await loginUserApi(loginData);
-    return response.user;
+  async (loginData: TLoginData, { rejectWithValue }) => {
+    try {
+      const response = await loginUserApi(loginData);
+      setCookie('accessToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
+      return response.user;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Ошибка входа'
+      );
+    }
   }
 );
 
-//гет данных
+//получение данных
 export const getUser = createAsyncThunk(
   'auth/user',
   async (_, { rejectWithValue, dispatch }) => {
@@ -64,11 +70,7 @@ export const getUser = createAsyncThunk(
       if ((error as Error).message.includes('jwt expired')) {
         try {
           const refreshData = await refreshToken();
-          setCookie(
-            'accessToken',
-            refreshData.accessToken.split('Bearer ')[1],
-            { expires: 20 * 60 }
-          );
+          setCookie('accessToken', refreshData.accessToken);
           localStorage.setItem('refreshToken', refreshData.refreshToken);
 
           const newResponse = await getUserApi();
@@ -85,7 +87,7 @@ export const getUser = createAsyncThunk(
   }
 );
 
-//апдейт юзера
+//обновление данных
 export const updateUser = createAsyncThunk(
   'auth/update',
   async (
@@ -104,21 +106,16 @@ export const updateUser = createAsyncThunk(
 );
 
 //выход
-export const clearAuthTokens = () => {
-  localStorage.removeItem('refreshToken');
-  document.cookie = 'accessToken=; Max-Age=0; path=/;';
-};
 
 export const logoutUser = createAsyncThunk(
   'auth/logout',
-  async (_, { rejectWithValue, dispatch }) => {
+  async (_, { rejectWithValue }) => {
     try {
       await logoutApi();
-      clearAuthTokens();
-      dispatch(logout());
+      localStorage.removeItem('refreshToken');
+      document.cookie = 'accessToken=; Max-Age=0; path=/;';
       return null;
     } catch (error) {
-      clearAuthTokens();
       return rejectWithValue(
         error instanceof Error ? error.message : 'Ошибка выхода'
       );
