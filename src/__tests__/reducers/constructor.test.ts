@@ -7,7 +7,6 @@ import {
 } from '../../services/slices/constructorItemsSlice';
 
 const mockBun = {
-    id: '643d69a5c3f7b9001cfa093c',
     _id: "643d69a5c3f7b9001cfa093c",
     name: "Краторная булка N-200i",
     type: "bun",
@@ -22,7 +21,6 @@ const mockBun = {
 };
 
 const mockMain = {
-    id: '643d69a5c3f7b9001cfa0941',
     _id: "643d69a5c3f7b9001cfa0941",
     name: "Биокотлета из марсианской Магнолии",
     type: "main",
@@ -51,8 +49,11 @@ describe('addIngredient', () => {
         );
         
         expect(result.bun).toMatchObject({
-        ...mockBun,
-        uuid: expect.any(String)
+            _id: mockBun._id,
+            name: mockBun.name,
+            type: mockBun.type,
+            price: mockBun.price,
+            image: mockBun.image,
         });
         expect(result.ingredients).toHaveLength(0);
     });
@@ -64,7 +65,7 @@ describe('addIngredient', () => {
         
         expect(result.ingredients).toEqual([{
         ...mockMain,
-        uuid: expect.any(String)
+        id: expect.any(String)
         }]);
         expect(result.bun).toBeNull();
     });
@@ -75,21 +76,21 @@ describe('removeIngredient', () => {
         const state = {
             bun: null,
             ingredients: [
-                { ...mockMain, uuid: '1' },
-                { ...mockMain, uuid: '2' }
+                { ...mockMain, id: '1' },
+                { ...mockMain, id: '2' }
             ]
         };
         const result = constructorItemsReducer(
             state,
             removeIngredient('1')
         );
-        expect(result.ingredients).toEqual([{ ...mockMain, uuid: '2' }]);
+        expect(result.ingredients).toEqual([{ ...mockMain, id: '2' }]);
     });
     test('состояние, если uuid не найден', () => {
         const state = {
             bun: null,
             ingredients: [
-                { ...mockMain, uuid: '1' }
+                { ...mockMain, id: '1' }
             ]
         };
         const result = constructorItemsReducer(
@@ -105,9 +106,9 @@ describe('moveIngredient', () => {
         const state = {
             bun: null,
             ingredients: [
-                { ...mockMain, uuid: '1' },
-                { ...mockMain, uuid: '2' },
-                { ...mockMain, uuid: '3' }
+                { ...mockMain, id: '1' },
+                { ...mockMain, id: '2' },
+                { ...mockMain, id: '3' }
             ]
         };
         const result = constructorItemsReducer(
@@ -121,8 +122,8 @@ describe('moveIngredient', () => {
         const state = {
             bun: null,
             ingredients: [
-                { ...mockMain, uuid: '1' },
-                { ...mockMain, uuid: '2' }
+                { ...mockMain, id: '1' },
+                { ...mockMain, id: '2' }
             ]
         };
         const result = constructorItemsReducer(
