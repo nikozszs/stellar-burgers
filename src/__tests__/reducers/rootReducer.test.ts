@@ -10,10 +10,10 @@ import {
 import { 
     initialState as userInitialState 
 } from "../../services/slices/userSlice";
-import { rootReducer, RootState, store } from "../../services/store"
+import { rootReducer, RootState } from "../../services/store"
 
 describe('rootReducer', () => {
-    test('должен возвращать начальное состояние при вызове с неопределенным состоянием и неизвестным действием'), () => {
+    test('должен возвращать начальное состояние при вызове с неопределенным состоянием и неизвестным действием', () => {
         const expectInitialState: RootState  = {
             ingredients: ingredientsInitialState,
             constructorItems: constructorInitialState,
@@ -22,7 +22,7 @@ describe('rootReducer', () => {
         };
         const result = rootReducer(undefined, { type: 'UNKNOWN_ACTION' });
         expect(result).toEqual(expectInitialState)
-    }
+    })
     test('не должен изменять состояние при неизвестном действии', () => {
         const testState = {
             ingredients: ingredientsInitialState,

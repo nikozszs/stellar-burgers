@@ -1,17 +1,10 @@
-import { fetchIngredients, ingredientsReducer } from '../../services/slices/ingredientSlice';
 import {
     constructorItemsReducer,
     initialState,
     addIngredient,
-    removeIngredient
+    removeIngredient,
+    moveIngredient
 } from '../../services/slices/constructorItemsSlice';
-import { IngredientsState } from '@utils-types';
-
-export const initialIngredientsState: IngredientsState = {
-    items: [],
-    isLoading: false,
-    error: null
-};
 
 const mockBun = {
     id: '643d69a5c3f7b9001cfa093c',
@@ -28,7 +21,7 @@ const mockBun = {
     image_large: "https://code.s3.yandex.net/react/code/bun-02-large.png"
 };
 
-const mockFilling = {
+const mockMain = {
     id: '643d69a5c3f7b9001cfa0941',
     _id: "643d69a5c3f7b9001cfa0941",
     name: "Биокотлета из марсианской Магнолии",
@@ -43,67 +36,99 @@ const mockFilling = {
     image_large: "https://code.s3.yandex.net/react/code/meat-01-large.png"
 };
 
-describe('sync actions', () => {
-    test('добавление булки', () => {
-        const action = addIngredient(mockBun);
-        const result = constructorItemsReducer(initialState, action);
-
-        expect(result.bun).toEqual(mockBun);
-        expect(result.ingredients).toHaveLength(0);
+describe('constructorItemsSlice reducer', () => {
+    test('initial state', () => {
+        expect(constructorItemsReducer(undefined, { type: 'unknown' }))
+        .toEqual(initialState);
     });
-    test('добавление начинки', () => {
-        const action = addIngredient(mockFilling);
-        const result = constructorItemsReducer(initialState, action);
+})
 
-        expect(result.ingredients).toHaveLength(1);
-        expect(result.ingredients[0]).toMatchObject({
-            ...mockFilling,
-            uuid: expect.any(String)
+describe('addIngredient', () => {
+    test('add bun', () => {
+        const result = constructorItemsReducer(
+        initialState,
+        addIngredient(mockBun)
+        );
+        
+        expect(result.bun).toMatchObject({
+        ...mockBun,
+        uuid: expect.any(String)
         });
-    });
-    test('удаление начинки', () => {
-        const stateWithItems = {
-            bun: mockBun,
-            ingredients: [{ ...mockFilling, uuid: 'test-uuid' }]
-        };
-        const action = removeIngredient('test-uuid');
-        const result = constructorItemsReducer(stateWithItems, action);
-
         expect(result.ingredients).toHaveLength(0);
-        expect(result.bun).toEqual(mockBun);
     });
-})
+    test('add main', () => {
+        const result = constructorItemsReducer(
+        initialState,
+        addIngredient(mockMain)
+        );
+        
+        expect(result.ingredients).toEqual([{
+        ...mockMain,
+        uuid: expect.any(String)
+        }]);
+        expect(result.bun).toBeNull();
+    });
+});
 
-describe('async actions', () => {
-    test('fetchIngredients.fulfilled', () => {
-        const mockIngredients = [mockBun, mockFilling];
-        const action = {
-            type: fetchIngredients.fulfilled.type,
-            payload: mockIngredients
+describe('removeIngredient', () => {
+    test('remove main ', () => {
+        const state = {
+            bun: null,
+            ingredients: [
+                { ...mockMain, uuid: '1' },
+                { ...mockMain, uuid: '2' }
+            ]
         };
-    
-        const state = ingredientsReducer(initialIngredientsState, action);
-        expect(state.items).toEqual(mockIngredients);
-        expect(state.isLoading).toBe(false);
-        expect(state.error).toBeNull();
+        const result = constructorItemsReducer(
+            state,
+            removeIngredient('1')
+        );
+        expect(result.ingredients).toEqual([{ ...mockMain, uuid: '2' }]);
     });
-    test('fetchIngredients.pending', () => {
-        const action = { type: fetchIngredients.pending.type };
-        const state = ingredientsReducer(initialIngredientsState, action);
-        
-        expect(state.isLoading).toBe(true);
-        expect(state.error).toBeNull();
-    });
-    test('fetchIngredients.rejected', () => {
-        const errorMessage = 'Failed to fetch';
-        const action = {
-            type: fetchIngredients.rejected.type,
-            error: { message: errorMessage }
+    test('состояние, если uuid не найден', () => {
+        const state = {
+            bun: null,
+            ingredients: [
+                { ...mockMain, uuid: '1' }
+            ]
         };
-        
-        const state = ingredientsReducer(initialIngredientsState, action);
-        
-        expect(state.isLoading).toBe(false);
-        expect(state.error).toBe(errorMessage);
+        const result = constructorItemsReducer(
+            state,
+            removeIngredient('999')
+        );
+        expect(result).toEqual(state);
     });
-})
+});
+
+describe('moveIngredient', () => {
+    test('поменять местами начинки', () => {
+        const state = {
+            bun: null,
+            ingredients: [
+                { ...mockMain, uuid: '1' },
+                { ...mockMain, uuid: '2' },
+                { ...mockMain, uuid: '3' }
+            ]
+        };
+        const result = constructorItemsReducer(
+            state,
+            moveIngredient({ fromIndex: 0, toIndex: 2 })
+        );
+        expect(result.ingredients.map(i => i.id))
+        .toEqual(['2', '3', '1']);
+    });
+    test('если индексы равны', () => {
+        const state = {
+            bun: null,
+            ingredients: [
+                { ...mockMain, uuid: '1' },
+                { ...mockMain, uuid: '2' }
+            ]
+        };
+        const result = constructorItemsReducer(
+            state,
+            moveIngredient({fromIndex: 1, toIndex: 1})
+        );
+        expect(result).toEqual(state);
+    });
+});
