@@ -1,0 +1,17 @@
+{
+    // расширяем основной конфиг всего проекта
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "baseUrl": ".",
+        "paths": {
+        "@/*": ["src/*"],
+        },
+        "types": ["cypress", "@types/cypress"]
+    },
+    "include": [
+        "../node_modules/cypress",
+        "**/*.ts",
+        "**/*.tsx"
+    ]
+}
