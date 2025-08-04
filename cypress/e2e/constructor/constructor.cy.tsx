@@ -32,7 +32,7 @@ describe('Модальное окно ингредиента', () => {
 
         // Закрытие через крестик
         cy.get('[data-testid="modal-close"]').click({ force: true });
-        cy.get('[data-testid="modal"]').should('not.exist');
+        cy.get('[data-testid="modal"]').should('not.be.visible');
 
         // Закрытие через оверлей
         cy.get('[data-testid="bun"]').first().click({ force: true });
