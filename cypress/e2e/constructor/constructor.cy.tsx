@@ -22,8 +22,8 @@ describe('Модальное окно ингредиента', () => {
 
     it('открытие и закрытие модалки ингредиентов', () => {
         // Проверка открытия модалки
-        cy.get('[data-testid="bun"]').first().click();
-        cy.get('[data-testid="modal"]', { withinSubject: null })
+        cy.get('[data-testid="bun"]').first().click({ force: true });
+        cy.get('[data-testid="modal-ingredient"]', { withinSubject: null })
             .should('be.visible')
             .within(() => {
                 cy.contains('h3', 'Краторная булка N-200i')
@@ -32,12 +32,12 @@ describe('Модальное окно ингредиента', () => {
 
         // Закрытие через крестик
         cy.get('[data-testid="modal-close"]').click({ force: true });
-        cy.get('[data-testid="modal"]').should('not.be.visible');
+        cy.get('[data-testid="modal-ingredient"]').should('not.be.visible');
 
         // Закрытие через оверлей
         cy.get('[data-testid="bun"]').first().click({ force: true });
         cy.get('[data-testid="modal-overlay"]').click({ force: true });
-        cy.get('[data-testid="modal"]').should('not.exist');
+        cy.get('[data-testid="modal-ingredient"]').should('not.exist');
         cy.get('[data-testid="modal-overlay"]').should('not.exist');
     });
 })
@@ -86,7 +86,7 @@ describe('Создание заказа', () => {
         });
 
         // Проверяем модальное окно заказа
-        cy.get('[data-testid="modal"]')
+        cy.get('[data-testid="modal-order"]', { withinSubject: null })
         .should('be.visible')
         .within(() => {
             cy.get('[data-testid="order-number"]')
@@ -95,7 +95,7 @@ describe('Создание заказа', () => {
 
         // Закрываем модальное окно заказа
         cy.get('[data-testid="modal-close"]').click();
-        cy.get('[data-testid="modal"]').should('not.exist');
+        cy.get('[data-testid="modal-order"]').should('not.exist');
 
         // Проверяем очистку конструктора
         cy.get('[data-testid="constructor-bun"]').should('not.exist');
