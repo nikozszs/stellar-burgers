@@ -28,22 +28,6 @@ type Interception = {
       cy.get('[data-testid="bun"]').first().click();
       cy.get('[data-testid="modal-ingredient"]').should('exist');
     });
-    // cy.get('[data-testid="modal-ingredient"]')
-    //     .should('be.visible')
-    //     .within(() => {
-    //         cy.contains('h3', 'Краторная булка N-200i')
-    //         .should('exist');
-    //     })
-    //
-    // // Закрытие через крестик
-    // cy.get('[data-testid="modal-close"]').click({ force: true });
-    // cy.get('[data-testid="modal-ingredient"]').should('not.be.visible');
-    //
-    // // Закрытие через оверлей
-    // cy.get('[data-testid="bun"]').first().click({ force: true });
-    // cy.get('[data-testid="modal-overlay"]').click({ force: true });
-    // cy.get('[data-testid="modal-ingredient"]').should('not.exist');
-    // cy.get('[data-testid="modal-overlay"]').should('not.exist');
   });
   
   describe('Создание заказа', () => {
@@ -114,4 +98,24 @@ type Interception = {
       cy.get('[data-testid="constructor-main"]').should('not.exist');
     });
   });
+
+  describe('Закрытие модал окна', () => {
+    beforeEach(() => {
+        cy.intercept('GET', 'api/ingredients', { fixture: 'ingredients.json' }).as(
+            'getIngredients'
+        );
+        cy.visit('http://localhost:4000');
+        cy.wait('@getIngredients');
   
+    it('должно закрываться при клике на крестик', () => {
+        cy.get('[data-testid="modal-close"]').click({ force: true });
+        cy.get('[data-testid="modal-ingredient"]').should('not.exist');
+        cy.get('[data-testid="modal-overlay"]').should('not.exist');
+    });
+    it('должно закрываться при клике на оверлей', () => {
+        cy.get('[data-testid="modal-overlay"]').click({ force: true });
+        cy.get('[data-testid="modal-ingredient"]').should('not.exist');
+        cy.get('[data-testid="modal-overlay"]').should('not.exist');
+    });
+  })
+  })
