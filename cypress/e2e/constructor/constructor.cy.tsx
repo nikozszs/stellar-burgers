@@ -26,7 +26,9 @@ type Interception = {
       // Проверка открытия модалки
       cy.get('[data-testid="modal-ingredient"]').should('not.exist');
       cy.get('[data-testid="bun"]').first().click();
-      cy.get('[data-testid="modal-ingredient"]').should('exist');
+      cy.get('[data-testid="modal-ingredient"]').should('exist').within(() => {
+        cy.contains('h3', 'Краторная булка N-200i').should('exist');
+      })
     });
   });
   
@@ -100,17 +102,34 @@ type Interception = {
   });
 
 describe('Закрытие модал окна', () => {
-    beforeEach(() => {
-        cy.visit('http://localhost:4000');
+  beforeEach(() => {
+    cy.intercept('GET', 'api/ingredients', { fixture: 'ingredients.json' }).as(
+      'getIngredients'
+    );
+    cy.visit('http://localhost:4000');
+    cy.wait('@getIngredients');
+  });
   
-    it('должно закрываться при клике на крестик и оверлей', () => {
-        cy.get('[data-testid="modal-close"]').click({ force: true });
-        cy.get('[data-testid="modal"]').should('not.exist');
-        cy.get('[data-testid="modal-overlay"]').should('not.exist');
+    it('должно закрываться при клике на крестик', () => {
+        // Открываем модальное окно
+        cy.get('[data-testid="bun"]').first().click();
+        cy.get('[data-testid="modal"]').should('be.visible');
+        cy.get('[data-testid="modal-overlay"]').should('exist');
 
-        cy.get('[data-testid="modal-overlay"]').click({ force: true });
-        cy.get('[data-testid="modal"]').should('not.exist');
+        // Закрываем через крестик
+        cy.get('[data-testid="modal-close"]').click({ force: true });
+        cy.get('[data-testid="modal"]').should('not.be.visible');
         cy.get('[data-testid="modal-overlay"]').should('not.exist');
     })
+    it('должно закрываться при клике на оверлей', () => {
+      // Открываем модальное окно
+      cy.get('[data-testid="bun"]').first().click();
+      cy.get('div.xqsNTMuGR8DdWtMkOGiM').should('exist');
+      cy.get('[data-testid="modal-overlay"]').should('exist');
+
+      // Закрываем через оверлей
+      cy.get('[data-testid="modal-overlay"]').click({ force: true });
+      cy.get('div.xqsNTMuGR8DdWtMkOGiM').should('not.exist');
+      cy.get('[data-testid="modal-overlay"]').should('not.exist');
   })
 })
