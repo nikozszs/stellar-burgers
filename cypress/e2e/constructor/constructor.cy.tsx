@@ -89,15 +89,15 @@ type Interception = {
         .should('be.visible')
         .within(() => {
           cy.get('[data-testid="order-number"]').should('contain', '85737');
-        });
+      });
+
+      // Проверяем очистку конструктора
+      cy.get('[data-testid="constructor-bun"]').should('not.exist');
+      cy.get('[data-testid="constructor-main"]').should('not.exist');
   
       // Закрываем модальное окно заказа
       cy.get('[data-testid="modal-close"]').click();
       cy.get('[data-testid="modal-order"]').should('not.exist');
-  
-      // Проверяем очистку конструктора
-      cy.get('[data-testid="constructor-bun"]').should('not.exist');
-      cy.get('[data-testid="constructor-main"]').should('not.exist');
     });
   });
 
@@ -113,23 +113,46 @@ describe('Закрытие модал окна', () => {
     it('должно закрываться при клике на крестик', () => {
         // Открываем модальное окно
         cy.get('[data-testid="bun"]').first().click();
-        cy.get('[data-testid="modal"]').should('be.visible');
+        cy.get('[data-testid="modal"]').should('exist');
         cy.get('[data-testid="modal-overlay"]').should('exist');
 
         // Закрываем через крестик
         cy.get('[data-testid="modal-close"]').click({ force: true });
-        cy.get('[data-testid="modal"]').should('not.be.visible');
+        cy.get('[data-testid="modal"]').should('not.exist');
         cy.get('[data-testid="modal-overlay"]').should('not.exist');
     })
     it('должно закрываться при клике на оверлей', () => {
       // Открываем модальное окно
       cy.get('[data-testid="bun"]').first().click();
-      cy.get('div.xqsNTMuGR8DdWtMkOGiM').should('exist');
+      cy.get('[data-testid="modal"]').should('exist');
       cy.get('[data-testid="modal-overlay"]').should('exist');
 
       // Закрываем через оверлей
       cy.get('[data-testid="modal-overlay"]').click({ force: true });
-      cy.get('div.xqsNTMuGR8DdWtMkOGiM').should('not.exist');
+      cy.get('[data-testid="modal"]').should('not.exist');
       cy.get('[data-testid="modal-overlay"]').should('not.exist');
   })
+})
+
+describe('Добав ингр', () => {
+  beforeEach(() => {
+    cy.intercept('GET', 'api/ingredients', { fixture: 'ingredients.json' }).as(
+      'getIngredients'
+    );
+    cy.visit('http://localhost:4000');
+    cy.wait('@getIngredients');
+  });
+  
+    it('Добавление ингредиентов', () => {
+      cy.get('[data-testid="bun"]')
+      .first()
+      .within(() => {
+        cy.contains('button', 'Добавить').click({ force: true });
+      });
+    cy.get('[data-testid="main"]')
+      .first()
+      .within(() => {
+        cy.contains('button', 'Добавить').click({ force: true });
+      });
+    })
 })
