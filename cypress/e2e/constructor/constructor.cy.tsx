@@ -124,7 +124,28 @@ describe('Добав ингр', () => {
       })
 })
 
-describe('Закрытие модального окна', () => {
+// describe('Закрытие модального окна', () => {
+//   beforeEach(() => {
+//     cy.intercept('GET', 'api/ingredients', { fixture: 'ingredients.json' }).as(
+//       'getIngredients'
+//     );
+//     cy.visit('http://localhost:4000');
+//     cy.wait('@getIngredients');
+//     cy.get('[data-testid="bun"]').first().click();
+//     cy.get('#modals').should('exist');
+//   });
+
+//   it('должно закрываться при клике на крестик', () => {
+//     cy.get('[data-testid="modal-close"]').click();
+//     cy.get('#modals').should('not.exist');
+//   });
+
+//   it('должно закрываться при клике на оверлей', () => {
+//     cy.get('[data-testid="modal-overlay"]').click({ force: true });
+//     cy.get('#modals').should('not.exist')
+//   });
+// });
+describe('Тестирование модального окна с деталями ингредиента', () => {
   beforeEach(() => {
     cy.intercept('GET', 'api/ingredients', { fixture: 'ingredients.json' }).as(
       'getIngredients'
@@ -132,16 +153,19 @@ describe('Закрытие модального окна', () => {
     cy.visit('http://localhost:4000');
     cy.wait('@getIngredients');
     cy.get('[data-testid="bun"]').first().click();
-    cy.get('#modals').should('exist');
+    cy.get('[data-testid="modal-ingredient"]').should('exist');
+    cy.contains('Калории, ккал').should('be.visible');
   });
 
   it('должно закрываться при клике на крестик', () => {
     cy.get('[data-testid="modal-close"]').click();
-    cy.get('#modals').should('not.exist');
+    cy.get('[data-testid="modal-ingredient"]').should('not.exist');
+    cy.contains('Калории, ккал').should('not.exist');
   });
 
   it('должно закрываться при клике на оверлей', () => {
     cy.get('[data-testid="modal-overlay"]').click({ force: true });
-    cy.get('#modals').should('not.exist')
+    cy.get('[data-testid="modal-ingredient"]').should('not.exist');
+    cy.contains('Калории, ккал').should('not.exist');
   });
-});
+})
