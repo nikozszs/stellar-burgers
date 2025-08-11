@@ -111,40 +111,23 @@ describe('Добав ингр', () => {
     });
     
       it('Добавление ингредиентов', () => {
+        cy.get('[data-testid="bun"]').should('not.exist');
+        cy.get('[data-testid="main"]').should('not.exist');
         cy.get('[data-testid="bun"]')
         .first()
         .within(() => {
           cy.contains('button', 'Добавить').click({ force: true });
         });
-      cy.get('[data-testid="main"]')
+        cy.get('[data-testid="main"]')
         .first()
         .within(() => {
           cy.contains('button', 'Добавить').click({ force: true });
         });
+        cy.get('[data-testid="bun"]').should('exist');
+        cy.get('[data-testid="main"]').should('exist');
       })
 })
 
-// describe('Закрытие модального окна', () => {
-//   beforeEach(() => {
-//     cy.intercept('GET', 'api/ingredients', { fixture: 'ingredients.json' }).as(
-//       'getIngredients'
-//     );
-//     cy.visit('http://localhost:4000');
-//     cy.wait('@getIngredients');
-//     cy.get('[data-testid="bun"]').first().click();
-//     cy.get('#modals').should('exist');
-//   });
-
-//   it('должно закрываться при клике на крестик', () => {
-//     cy.get('[data-testid="modal-close"]').click();
-//     cy.get('#modals').should('not.exist');
-//   });
-
-//   it('должно закрываться при клике на оверлей', () => {
-//     cy.get('[data-testid="modal-overlay"]').click({ force: true });
-//     cy.get('#modals').should('not.exist')
-//   });
-// });
 describe('Тестирование модального окна с деталями ингредиента', () => {
   beforeEach(() => {
     cy.intercept('GET', 'api/ingredients', { fixture: 'ingredients.json' }).as(
