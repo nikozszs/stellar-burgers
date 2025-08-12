@@ -119,17 +119,23 @@ describe('Добав ингр', () => {
         cy.get('[data-testid="bun"]')
         .first()
         .within(() => {
+          cy.get('[data-testid="name"]').should('have.text', 'Краторная булка N-200i');
           cy.contains('button', 'Добавить').click({ force: true });
         });
-
+        
+        const ingredientName = "Филе Люминесцентного тетраодонтимформа";
         cy.get('[data-testid="main"]')
         .first()
         .within(() => {
+          cy.get('[data-testid="name"]').should('have.text', ingredientName);
           cy.contains('button', 'Добавить').click({ force: true });
         });
 
         cy.get('[data-testid="constructor-bun"]').should('exist');
         cy.get('[data-testid="constructor-main"]').find('li').should('have.length', 1);
+        cy.get(`[data-testid="con${ingredientName}"]`)
+        .should('exist')
+        .and('contain.text', ingredientName);
       })
 })
 
