@@ -44,7 +44,7 @@ const App = () => {
       dispatch(getUser())
         .unwrap()
         .catch((err) => {
-          console.error('Failed to get user:', err);
+          // console.error('Failed to get user:', err);
           dispatch(logout());
         });
     } else {

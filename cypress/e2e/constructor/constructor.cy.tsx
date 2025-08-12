@@ -20,10 +20,10 @@ type Interception = {
       );
       cy.visit('http://localhost:4000');
       cy.wait('@getIngredients');
+      cy.get('main', { timeout: 10000 }).should('be.visible'); 
     });
   
     it('открытие и закрытие модалки ингредиентов', () => {
-      // Проверка открытия модалки
       cy.get('[data-testid="modal-ingredient"]').should('not.exist');
       cy.get('[data-testid="bun"]').first().click();
       cy.get('[data-testid="modal-ingredient"]').should('exist').within(() => {
@@ -50,6 +50,7 @@ type Interception = {
       cy.visit('http://localhost:4000');
       cy.wait('@getIngredients');
       cy.wait('@getUser');
+      cy.get('main', { timeout: 10000 }).should('be.visible'); 
     });
   
     afterEach(() => {
@@ -91,13 +92,13 @@ type Interception = {
           cy.get('[data-testid="order-number"]').should('contain', '85737');
       });
 
-      // Проверяем очистку конструктора
-      cy.get('[data-testid="constructor-bun"]').should('not.exist');
-      cy.get('[data-testid="constructor-main"]').should('not.exist');
-  
       // Закрываем модальное окно заказа
       cy.get('[data-testid="modal-close"]').click();
       cy.get('[data-testid="modal-order"]').should('not.exist');
+
+      // Проверяем очистку конструктора
+      cy.get('[data-testid="constructor-bun"]').should('not.exist');
+      cy.get('[data-testid="constructor-main"]').find('li').should('have.length', 0);
     });
   });
 
@@ -108,23 +109,27 @@ describe('Добав ингр', () => {
       );
       cy.visit('http://localhost:4000');
       cy.wait('@getIngredients');
+      cy.get('main', { timeout: 10000 }).should('be.visible');
     });
     
       it('Добавление ингредиентов', () => {
-        cy.get('[data-testid="bun"]').should('not.exist');
-        cy.get('[data-testid="main"]').should('not.exist');
+        cy.get('[data-testid="constructor-bun"]').should('not.exist');
+        cy.get('[data-testid="constructor-main"]').find('li').should('have.length', 0);
+
         cy.get('[data-testid="bun"]')
         .first()
         .within(() => {
           cy.contains('button', 'Добавить').click({ force: true });
         });
+
         cy.get('[data-testid="main"]')
         .first()
         .within(() => {
           cy.contains('button', 'Добавить').click({ force: true });
         });
-        cy.get('[data-testid="bun"]').should('exist');
-        cy.get('[data-testid="main"]').should('exist');
+
+        cy.get('[data-testid="constructor-bun"]').should('exist');
+        cy.get('[data-testid="constructor-main"]').find('li').should('have.length', 1);
       })
 })
 
@@ -135,6 +140,7 @@ describe('Тестирование модального окна с деталя
     );
     cy.visit('http://localhost:4000');
     cy.wait('@getIngredients');
+    cy.get('main', { timeout: 10000 }).should('be.visible'); 
     cy.get('[data-testid="bun"]').first().click();
     cy.get('[data-testid="modal-ingredient"]').should('exist');
     cy.contains('Калории, ккал').should('be.visible');
